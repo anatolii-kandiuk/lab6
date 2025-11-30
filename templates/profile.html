@@ -33,7 +33,7 @@
                 <button class="btn btn-danger" name="action" value="disable">Вимкнути 2FA</button>
               </form>
               {% endif %}
-              <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Вийти</a>
+              <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary">Вийти</a>
               <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
                 data-bs-target="#deleteAccountModal">Видалити акаунт</button>
             </div>
@@ -47,8 +47,8 @@
       <!-- Change Password Section -->
       <div class="card">
         <div class="card-body">
-          <h4 class="card-title mb-4">Зміна пароля</h4>
-          <form method="POST" action="{{ url_for('change_password') }}">
+          <h5 class="card-title">Зміна пароля</h5>
+          <form method="POST" action="{{ url_for('profile.change_password') }}">
             {{ password_form.hidden_tag() }}
             <div class="mb-3">
               {{ password_form.old_password.label(class_='form-label') }}
@@ -112,7 +112,7 @@
         <p>Видалення акаунту <strong>необоротне</strong>. Все ваші дані будуть видалені навіки, включно з історією
           входів.</p>
         <p>Щоб підтвердити видалення, введіть слово <code>видалити</code> у поле нижче:</p>
-        <form id="deleteForm" method="POST" action="{{ url_for('delete_account') }}">
+        <form id="deleteForm" method="POST" action="{{ url_for('profile.delete_account') }}">
           <div class="mb-3">
             <input type="text" class="form-control" id="confirmInput" name="confirm" placeholder="Введіть: видалити"
               required>

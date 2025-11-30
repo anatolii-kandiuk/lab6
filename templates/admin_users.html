@@ -107,12 +107,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
-                <p>Ви впевнені, що хочете видалити користувача <strong>{{ user.username }}</strong> ({{ user.email }})?</p>
+                <p>Ви впевнені, що хочете видалити користувача <strong>{{ user.username }}</strong> ({{ user.email }})?
+                </p>
                 <p class="text-danger">Ця дія незворотна. Всі дані користувача та логи входів будуть видалені.</p>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}" class="d-inline">
+                <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" class="d-inline">
                   <button type="submit" class="btn btn-danger">Видалити</button>
                 </form>
               </div>
