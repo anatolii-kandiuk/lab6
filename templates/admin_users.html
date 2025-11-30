@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Управління користувачами{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Управління користувачами</h2>
+  <p class="text-muted">Список всіх зареєстрованих користувачів системи</p>
+
+  <!-- Статистика -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card border">
+        <div class="card-body">
+          <h6 class="card-title">Всього користувачів</h6>
+          <p class="card-text fs-4">{{ users|length }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border">
+        <div class="card-body">
+          <h6 class="card-title text-success">Активовані</h6>
+          <p class="card-text fs-4">{{ users|selectattr('is_active')|list|length }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border">
+        <div class="card-body">
+          <h6 class="card-title text-warning">Не активовані</h6>
+          <p class="card-text fs-4">{{ users|rejectattr('is_active')|list|length }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Таблиця користувачів -->
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Ім'я користувача</th>
+          <th>Email</th>
+          <th>Статус</th>
+          <th>2FA</th>
+          <th>Адмін</th>
+          <th>Невдалі спроби</th>
+          <th>Дії</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if users %}
+        {% for user in users %}
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            {% if user.is_active %}
+            <span class="badge bg-success">Активовано</span>
+            {% else %}
+            <span class="badge bg-warning">Не активовано</span>
+            {% endif %}
+            {% if user.is_locked() %}
+            <span class="badge bg-danger">Заблоковано</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if user.two_factor_enabled %}
+            <span class="badge bg-info">Увімкнено</span>
+            {% else %}
+            <span class="text-muted">Вимкнено</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if user.is_admin %}
+            <span class="badge bg-primary">Так</span>
+            {% else %}
+            <span class="text-muted">Ні</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if user.failed_login_count > 0 %}
+            <span class="badge bg-danger">{{ user.failed_login_count }}</span>
+            {% else %}
+            <span class="text-muted">0</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if user.id != current_user.id %}
+            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+              data-bs-target="#deleteModal{{ user.id }}">
+              Видалити
+            </button>
+            {% else %}
+            <span class="text-muted">Ви</span>
+            {% endif %}
+          </td>
+        </tr>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal{{ user.id }}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Підтвердження видалення</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p>Ви впевнені, що хочете видалити користувача <strong>{{ user.username }}</strong> ({{ user.email }})?</p>
+                <p class="text-danger">Ця дія незворотна. Всі дані користувача та логи входів будуть видалені.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}" class="d-inline">
+                  <button type="submit" class="btn btn-danger">Видалити</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="8" class="text-center text-muted py-4">
+            Користувачів не знайдено
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

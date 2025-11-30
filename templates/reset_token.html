@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Відновлення пароля{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h2 class="text-center mb-4">Новий пароль</h2>
+  <p class="text-muted text-center">Введіть новий пароль для вашого облікового запису</p>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.password.label(class_='form-label') }}
+      <div class="input-group">
+        {% set cls = 'form-control' + (' is-invalid' if form.password.errors else '') %}
+        {{ form.password(class_=cls, id='password-reset') }}
+        <button class="btn btn-outline-secondary pw-toggle" type="button" data-pw-target="password-reset"
+          data-pw-reqs="pw-reqs-reset" style="color:#000">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.5 12s4-7.5 9.5-7.5S21.5 12 21.5 12s-4 7.5-9.5 7.5S2.5 12 2.5 12z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+      </div>
+      {% for err in form.password.errors %}
+      <div class="invalid-feedback d-block">{{ err }}</div>
+      {% endfor %}
+
+      <ul id="pw-reqs-reset" class="small mt-2">
+        <li data-regex=".{8,}" class="text-danger">Мінімум 8 символів</li>
+        <li data-regex="[A-Z]" class="text-danger">Принаймні одна велика літера (A-Z)</li>
+        <li data-regex="[a-z]" class="text-danger">Принаймні одна мала літера (a-z)</li>
+        <li data-regex="[0-9]" class="text-danger">Принаймні одна цифра (0-9)</li>
+        <li data-regex="[^A-Za-z0-9]" class="text-danger">Принаймні один спеціальний символ</li>
+      </ul>
+    </div>
+    <div class="mb-3">
+      {{ form.confirm_password.label(class_='form-label') }}
+      {% set cls = 'form-control' + (' is-invalid' if form.confirm_password.errors else '') %}
+      {{ form.confirm_password(class_=cls) }}
+      {% for err in form.confirm_password.errors %}
+      <div class="invalid-feedback">{{ err }}</div>
+      {% endfor %}
+    </div>
+    <button class="btn btn-primary w-100" type="submit">Скинути пароль</button>
+  </form>
+  <div class="text-center mt-3">
+    <p class="text-muted"><a href="{{ url_for('login') }}">Повернутися до входу</a></p>
+  </div>
+</div>
+{% endblock %}

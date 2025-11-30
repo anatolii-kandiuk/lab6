@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}Логи спроб входу{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Логи спроб входу</h2>
+  <p class="text-muted">Історія всіх спроб автентифікації в системі</p>
+
+  <!-- Статистика -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card border">
+        <div class="card-body">
+          <h6 class="card-title text-success">Успішні входи</h6>
+          <p class="card-text fs-4">{{ attempts|selectattr('success')|list|length }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border">
+        <div class="card-body">
+          <h6 class="card-title text-danger">Невдалі спроби</h6>
+          <p class="card-text fs-4">{{ attempts|rejectattr('success')|list|length }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border">
+        <div class="card-body">
+          <h6 class="card-title">Всього записів</h6>
+          <p class="card-text fs-4">{{ attempts|length }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Фільтри -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <form method="GET" class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Фільтр по статусу:</label>
+          <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="all" {% if request.args.get('status', 'all' )=='all' %}selected{% endif %}>Всі</option>
+            <option value="success" {% if request.args.get('status')=='success' %}selected{% endif %}>Тільки успішні
+            </option>
+            <option value="failed" {% if request.args.get('status')=='failed' %}selected{% endif %}>Тільки невдалі
+            </option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Користувач:</label>
+          <input type="text" name="username" class="form-control" placeholder="Ім'я користувача"
+            value="{{ request.args.get('username', '') }}">
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Застосувати</button>
+            <a href="{{ url_for('admin_logs') }}" class="btn btn-secondary">Скинути</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Таблиця логів -->
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Час</th>
+          <th>Користувач</th>
+          <th>Email</th>
+          <th>IP адреса</th>
+          <th>Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if attempts %}
+        {% for a in attempts %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ a.timestamp.strftime('%Y-%m-%d %H:%M:%S') if a.timestamp else 'N/A' }}</td>
+          <td>
+            {% if a.user %}
+            {{ a.user.username }}
+            {% else %}
+            <span class="text-muted">Невідомо</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if a.user %}
+            {{ a.user.email }}
+            {% else %}
+            <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td>{{ a.ip_address or 'N/A' }}</td>
+          <td>
+            {% if a.success %}
+            <span class="badge bg-success">Успішно</span>
+            {% else %}
+            <span class="badge bg-danger">Невдало</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">
+            Логи відсутні
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if attempts|length >= 200 %}
+  <div class="alert alert-info">
+    <strong>Увага:</strong> Показано останні 200 записів. Для перегляду повної історії розгляньте можливість додавання
+    пагінації.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

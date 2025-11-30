@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Профіль{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h3 class="card-title mb-4">Профіль користувача</h3>
+          <div class="mb-3">
+            <strong>Користувач:</strong> {{ current_user.username }}
+          </div>
+          <div class="mb-3">
+            <strong>Email:</strong> {{ current_user.email }}
+          </div>
+          <div class="mb-3">
+            <strong>Двофакторна автентифікація:</strong>
+            {% if current_user.two_factor_enabled %}
+            <span class="badge bg-success">Увімкнено</span>
+            {% else %}
+            <span class="badge bg-secondary">Вимкнено</span>
+            {% endif %}
+          </div>
+
+          <div class="mt-4">
+            <div class="d-flex gap-2 flex-wrap">
+              {% if not current_user.two_factor_enabled %}
+              <form method="post" class="d-inline">
+                <button class="btn btn-success" name="action" value="enable">Увімкнути 2FA</button>
+              </form>
+              {% else %}
+              <form method="post" class="d-inline">
+                <button class="btn btn-danger" name="action" value="disable">Вимкнути 2FA</button>
+              </form>
+              {% endif %}
+              <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Вийти</a>
+              <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                data-bs-target="#deleteAccountModal">Видалити акаунт</button>
+            </div>
+            {% if not current_user.two_factor_enabled %}
+            <small class="d-block mt-2 text-muted">Код для входу буде надсилатися на вашу пошту.</small>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Password Section -->
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Зміна пароля</h4>
+          <form method="POST" action="{{ url_for('change_password') }}">
+            {{ password_form.hidden_tag() }}
+            <div class="mb-3">
+              {{ password_form.old_password.label(class_='form-label') }}
+              {% set cls = 'form-control' + (' is-invalid' if password_form.old_password.errors else '') %}
+              {{ password_form.old_password(class_=cls) }}
+              {% for err in password_form.old_password.errors %}
+              <div class="invalid-feedback">{{ err }}</div>
+              {% endfor %}
+            </div>
+            <div class="mb-3">
+              {{ password_form.new_password.label(class_='form-label') }}
+              <div class="input-group">
+                {% set cls = 'form-control' + (' is-invalid' if password_form.new_password.errors else '') %}
+                {{ password_form.new_password(class_=cls, id='new-password') }}
+                <button class="btn btn-outline-secondary pw-toggle" type="button" data-pw-target="new-password"
+                  data-pw-reqs="pw-reqs-new" style="color:#000">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2.5 12s4-7.5 9.5-7.5S21.5 12 21.5 12s-4 7.5-9.5 7.5S2.5 12 2.5 12z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              {% for err in password_form.new_password.errors %}
+              <div class="invalid-feedback d-block">{{ err }}</div>
+              {% endfor %}
+              <ul id="pw-reqs-new" class="small mt-2">
+                <li data-regex=".{8,}" class="text-danger">Мінімум 8 символів</li>
+                <li data-regex="[A-Z]" class="text-danger">Принаймні одна велика літера (A-Z)</li>
+                <li data-regex="[a-z]" class="text-danger">Принаймні одна мала літера (a-z)</li>
+                <li data-regex="[0-9]" class="text-danger">Принаймні одна цифра (0-9)</li>
+                <li data-regex="[^A-Za-z0-9]" class="text-danger">Принаймні один спеціальний символ</li>
+              </ul>
+            </div>
+            <div class="mb-3">
+              {{ password_form.confirm_password.label(class_='form-label') }}
+              {% set cls = 'form-control' + (' is-invalid' if password_form.confirm_password.errors else '') %}
+              {{ password_form.confirm_password(class_=cls) }}
+              {% for err in password_form.confirm_password.errors %}
+              <div class="invalid-feedback">{{ err }}</div>
+              {% endfor %}
+            </div>
+            {{ password_form.submit(class_='btn btn-primary') }}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Видалення акаунту</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-danger"><strong>Увага!</strong></p>
+        <p>Видалення акаунту <strong>необоротне</strong>. Все ваші дані будуть видалені навіки, включно з історією
+          входів.</p>
+        <p>Щоб підтвердити видалення, введіть слово <code>видалити</code> у поле нижче:</p>
+        <form id="deleteForm" method="POST" action="{{ url_for('delete_account') }}">
+          <div class="mb-3">
+            <input type="text" class="form-control" id="confirmInput" name="confirm" placeholder="Введіть: видалити"
+              required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+            <button type="submit" class="btn btn-danger" id="confirmDeleteBtn" disabled>Видалити акаунт</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('confirmInput').addEventListener('input', function () {
+    var btn = document.getElementById('confirmDeleteBtn');
+    btn.disabled = this.value.toLowerCase() !== 'видалити';
+  });
+</script>
+{% endblock %}

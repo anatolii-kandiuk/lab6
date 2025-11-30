@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Запит на відновлення пароля{% endblock %}
+{% block content %}
+<div class="form-card">
+  <h2 class="text-center mb-4">Відновлення пароля</h2>
+  <p class="text-muted text-center">Введіть вашу електронну пошту для отримання посилання на відновлення пароля</p>
+  <p class="text-muted text-center small">Токен буде дійсний протягом 1 години</p>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.email.label(class_='form-label') }}
+      {% set cls = 'form-control' + (' is-invalid' if form.email.errors else '') %}
+      {{ form.email(class_=cls, placeholder='your@email.com') }}
+      {% for err in form.email.errors %}
+      <div class="invalid-feedback">{{ err }}</div>
+      {% endfor %}
+    </div>
+    <button class="btn btn-primary w-100" type="submit">Надіслати лист</button>
+  </form>
+  <div class="text-center mt-3">
+    <p class="text-muted"><a href="{{ url_for('login') }}">Повернутися до входу</a></p>
+  </div>
+</div>
+{% endblock %}
